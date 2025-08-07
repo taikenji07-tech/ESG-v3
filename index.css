@@ -302,12 +302,18 @@ body {
   color: var(--text-main);
   border: 1px solid var(--border-color);
   box-shadow: 0 3px 6px var(--shadow-color);
+  touch-action: none; /* Prevents scrolling on touch devices */
 }
 .dd-item:active {
   cursor: grabbing;
-  transform: scale(0.95);
-  box-shadow: 0 1px 2px var(--shadow-color);
 }
+
+.dd-item.dragging {
+  opacity: 0.5;
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px var(--shadow-color);
+}
+
 .dd-target {
   padding: 16px;
   border-radius: 24px;
