@@ -6,6 +6,7 @@ import { translations } from './translations';
 interface WordSearchQuizProps {
     node: WordSearchQuizNode;
     onComplete: () => void;
+    onSkip: () => void;
     language: Language;
 }
 
@@ -64,7 +65,7 @@ const generateGrid = (words: string[], size: number): { grid: Grid; placedWords:
 };
 
 // --- Component ---
-export const WordSearchQuiz: React.FC<WordSearchQuizProps> = ({ node, onComplete, language }) => {
+export const WordSearchQuiz: React.FC<WordSearchQuizProps> = ({ node, onComplete, onSkip, language }) => {
     const t = (key: string) => translations[language][key] || key;
     const wordsToFind = useMemo(() => node.words.map(t).sort((a, b) => a.length - b.length), [node.words, language]);
 
@@ -93,7 +94,7 @@ export const WordSearchQuiz: React.FC<WordSearchQuizProps> = ({ node, onComplete
                 setFoundWords(newFoundWords);
                 
                 if (newFoundWords.size === wordsToFind.length) {
-                    setTimeout(() => onComplete(), 500);
+                    // Don't auto-complete, wait for user to click "Finish"
                 }
                 return; 
             }
@@ -212,16 +213,23 @@ export const WordSearchQuiz: React.FC<WordSearchQuizProps> = ({ node, onComplete
                 ))}
             </div>
             
-            {allFound && (
-                <div className="text-center pt-4">
+            <div className="text-center pt-4">
+                {!allFound ? (
                     <button
-                        onClick={() => onComplete()}
+                        onClick={onSkip}
+                        className="ws-skip-button"
+                    >
+                        {t('btn_skip_question')}
+                    </button>
+                ) : (
+                    <button
+                        onClick={onComplete}
                         className="ws-submit-button"
                     >
                         {t('btn_finish_quiz')}
                     </button>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };
