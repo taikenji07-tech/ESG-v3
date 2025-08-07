@@ -30,7 +30,7 @@ export const translations: Translations = {
     start_text:
       "Hiii! 👋 I'm your super friendly guide to all things ESG! I'm so excited to chat with you. To make this extra personal, what should I call you?",
     greeting_text:
-      "It's so lovely to meet you, **{userName}**! 🎉 Let's dive in and learn some amazing things together. First up... what even *is* ESG?",
+      "It's so lovely to meet you, **{userName}**! 🎉 Let's dive in and learn some amazing things together. First up... what even **is** ESG?",
     what_is_esg_answer_text:
       "ESG = **Environmental, Social & Governance.**\n\nIt’s a framework for how we care for the planet 🌍, people 🤝, and systems 🏛️.\n\n- **Environmental**: Clean energy, less waste\n- **Social**: Fairness, diversity, respect\n- **Governance**: Ethics, transparency, good leadership\n\nESG matters because what you do – what you buy, how you learn, how you treat others – helps shape the future.",
     main_loop_text: "What else about ESG can I know?",
