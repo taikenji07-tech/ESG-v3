@@ -482,11 +482,27 @@ body {
   background: var(--accent);
   transition: all 0.2s ease;
   border: none;
+  cursor: pointer;
 }
 .ws-submit-button:hover {
   transform: translateY(-3px) scale(1.03);
   filter: brightness(1.1);
   box-shadow: 0 6px 16px var(--shadow-color);
+}
+
+.ws-skip-button {
+  padding: 14px 28px;
+  border-radius: 99px;
+  font-weight: bold;
+  color: var(--text-dim);
+  background: transparent;
+  transition: all 0.2s ease;
+  border: 2px solid var(--border-color);
+  cursor: pointer;
+}
+.ws-skip-button:hover {
+    background-color: var(--surface-a);
+    border-color: var(--text-dim);
 }
 
 
