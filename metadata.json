@@ -1,0 +1,6 @@
+{
+  "name": "ESG Student Guide Chatbot",
+  "description": "An interactive chatbot that guides students through the concepts of Environmental, Social, and Governance (ESG) principles, featuring a quiz and dynamic responses powered by the Gemini API.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
