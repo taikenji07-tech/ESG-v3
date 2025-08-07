@@ -554,7 +554,7 @@ const App: React.FC = () => {
                     onClose={handleCertificateClose} 
                 />
             )}
-            <div className="relative z-10 flex flex-col h-screen">
+            <div className="relative z-10 flex flex-col h-dvh">
                 <Header 
                     score={gameState.score}
                     streak={gameState.streak}
