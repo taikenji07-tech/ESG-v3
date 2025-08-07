@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './Header';
 import { BackgroundEffects } from './BackgroundEffects';
@@ -41,8 +42,9 @@ const ChatMessage: React.FC<{
     onOptionClick: (nextNodeId: NodeId, branchKey: string, buttonText: string, type?: 'share_linkedin' | 'show_certificate' | 'external_link') => void;
     onDragDropQuizComplete: (isCorrect: boolean) => void;
     onWordSearchQuizComplete: () => void;
+    onWordSearchQuizSkip: () => void;
     userAvatar: string;
-}> = ({ message, onOptionClick, onDragDropQuizComplete, onWordSearchQuizComplete, userAvatar }) => {
+}> = ({ message, onOptionClick, onDragDropQuizComplete, onWordSearchQuizComplete, onWordSearchQuizSkip, userAvatar }) => {
     const formatMessageContent = (text: string) => {
         return text
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -90,7 +92,7 @@ const ChatMessage: React.FC<{
                         <DragDropQuiz node={message.quizData} onComplete={onDragDropQuizComplete} language={message.language!} />
                     )}
                     {message.quizData && message.quizData.type === 'QUIZ_WORD_SEARCH' && (
-                        <WordSearchQuiz node={message.quizData} onComplete={onWordSearchQuizComplete} language={message.language!} />
+                        <WordSearchQuiz node={message.quizData} onComplete={onWordSearchQuizComplete} onSkip={onWordSearchQuizSkip} language={message.language!} />
                     )}
                 </div>
             </div>
@@ -388,6 +390,19 @@ const App: React.FC = () => {
             resetGame();
             return;
         }
+
+        if (nextNodeId === 'restart_quiz') {
+            setGameState(prev => ({
+                ...prev,
+                score: 280,
+                streak: 0,
+                quizCorrectAnswers: 0,
+                lastQuestionId: '',
+                quizCompleted: false, // Allow earning points and achievements again
+            }));
+            setCurrentNodeId('quiz_q1');
+            return;
+        }
         
         if (nextNodeId === 'quiz_end' && !gameState.quizCompleted) {
             if (gameState.quizCorrectAnswers >= 5) { // Updated for new number of questions
@@ -451,6 +466,21 @@ const App: React.FC = () => {
         setCurrentNodeId(node.nextNode);
     };
 
+    const handleWordSearchQuizSkip = () => {
+        userInteractionCount.current++;
+        const lastMessage = messages[messages.length - 1];
+        addMessage({ sender: 'user', text: t('btn_skip_question') }, lastMessage.id);
+
+        setGameState(prev => ({ 
+            ...prev, 
+            lastQuestionId: 'quiz_q8',
+            streak: 0 // Skipping breaks the streak
+        }));
+
+        const node = decisionTree['quiz_q8'] as WordSearchQuizNode;
+        setCurrentNodeId(node.nextNode);
+    };
+
     const handleCertificateClose = () => {
         setShowCertificate(false);
         addMessage({
@@ -459,7 +489,7 @@ const App: React.FC = () => {
             buttons: [
                 { text: t('btn_share_score'), nextNode: 'share_action', type: 'share_linkedin' },
                 { text: t('btn_end_curriculum'), nextNode: 'end_session_fireworks' },
-                { text: t('btn_start_over'), nextNode: 'start' }
+                { text: t('btn_start_over'), nextNode: 'restart_quiz' }
             ]
         });
     };
@@ -588,7 +618,7 @@ const App: React.FC = () => {
                         <>
                             <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar">
                                 {messages.map((msg) => (
-                                <ChatMessage key={msg.id} message={msg} onOptionClick={handleOptionClick} onDragDropQuizComplete={handleDragDropQuizComplete} onWordSearchQuizComplete={handleWordSearchQuizComplete} userAvatar={userAvatar} />
+                                <ChatMessage key={msg.id} message={msg} onOptionClick={handleOptionClick} onDragDropQuizComplete={handleDragDropQuizComplete} onWordSearchQuizComplete={handleWordSearchQuizComplete} onWordSearchQuizSkip={handleWordSearchQuizSkip} userAvatar={userAvatar} />
                                 ))}
                                 {isTyping && <TypingIndicator />}
                             </div>
