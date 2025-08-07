@@ -179,6 +179,7 @@ export const translations: Translations = {
     'Type your answer here...': 'Type your answer here...',
     'toggle_language_to_ms': 'Switch to Bahasa Malaysia',
     'toggle_language_to_en': 'Switch to English',
+    btn_skip_question: "Skip Question",
     
     // Word Search Words
     'word_recycle': "RECYCLE",
@@ -359,6 +360,7 @@ export const translations: Translations = {
     'Type your answer here...': 'Taip jawapan anda di sini...',
     'toggle_language_to_ms': 'Tukar ke Bahasa Malaysia',
     'toggle_language_to_en': 'Tukar ke Bahasa Inggeris',
+    btn_skip_question: "Langkau Soalan",
 
     // Word Search Words
     'word_recycle': "RECYCLE",
