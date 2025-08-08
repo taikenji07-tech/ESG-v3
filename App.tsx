@@ -372,7 +372,7 @@ const App: React.FC = () => {
         }
 
         if (type === 'share_linkedin') {
-            const shareText = encodeURIComponent(`I just completed the ESG Student Guide by RHB, scoring ${gameState.score} out of 1000 points, and earned a certificate of completion! It's a fantastic interactive way to learn about Environmental, Social, and Governance principles. #ESG #Sustainability #Student #RHBCares #RHB #rhbi`);
+            const shareText = encodeURIComponent(`I just completed the ESG Student Guide by RHB, scoring ${gameState.score} out of 1000 points, and earned a certificate of completion! It's a fantastic interactive way to learn about Environmental, Social, and Governance principles. #ESG #Sustainability #RHBCares #RHBInsurance`);
             const url = `https://www.linkedin.com/feed/?shareActive=true&text=${shareText}`;
             window.open(url, '_blank');
             return;
