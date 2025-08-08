@@ -98,19 +98,25 @@ export const decisionTree: DecisionTree = {
         parentLoop: 'more_importance_esg',
         nextNode: 'insurance_summary',
         branches: {
-            'laptop': { text: "btn_laptop_scenario", nextNode: 'insurance_laptop_answer' },
+            'transport': { text: "btn_transport_scenario", nextNode: 'insurance_transport_answer' },
             'sickness': { text: "btn_sickness_scenario", nextNode: 'insurance_sickness_answer' }
         }
     },
-    'insurance_laptop_answer': {
-        text: "insurance_laptop_answer_text",
+    'insurance_transport_answer': {
+        text: "insurance_transport_answer_text",
         type: 'ANSWER',
-        buttons: [ { text: "btn_thats_useful_move_on", nextNode: 'insurance_demo_redirect' } ]
+        buttons: [
+             { text: "btn_explore_more", nextNode: 'https://www.rhbinsurance.com.my/', type: 'external_link' },
+             { text: "btn_continue_to_summary", nextNode: 'insurance_summary' }
+        ]
     },
     'insurance_sickness_answer': {
         text: "insurance_sickness_answer_text",
         type: 'ANSWER',
-        buttons: [ { text: "btn_thats_useful_move_on", nextNode: 'insurance_demo_redirect' } ]
+        buttons: [
+            { text: "btn_explore_more", nextNode: 'https://www.rhbinsurance.com.my/', type: 'external_link' },
+            { text: "btn_continue_to_summary", nextNode: 'insurance_summary' }
+        ]
     },
     'insurance_demo_redirect': { type: 'REDIRECT', nextNode: 'insurance_demo_prompt' },
     'insurance_summary': {
