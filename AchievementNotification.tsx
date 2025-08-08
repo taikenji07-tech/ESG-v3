@@ -23,7 +23,7 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
 
     const IconComponent = achievement ? iconMap[achievement.icon] || AwardIcon : AwardIcon;
     const title = achievement ? t(achievement.titleKey) : '';
-    const desc = achievement ? `${t(achievement.descKey)} +${achievement.points} ${t('points')}` : '';
+    const desc = achievement ? t(achievement.descKey) : '';
 
     return (
         <div 
