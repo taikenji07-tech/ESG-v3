@@ -353,7 +353,7 @@ export const decisionTree: DecisionTree = {
         isDynamic: true,
         buttons: [ 
             { text: "btn_claim_certificate", nextNode: 'show_certificate_action', type: 'show_certificate' },
-            { text: "btn_end_curriculum", nextNode: 'end_session_fireworks'},
+            { text: "btn_end_curriculum", nextNode: 'end_curriculum'},
             { text: "btn_start_over", nextNode: 'start' } 
         ]
     },
@@ -362,13 +362,9 @@ export const decisionTree: DecisionTree = {
         isDynamic: true,
         type: 'ANSWER', 
         buttons: [ 
-            { text: "btn_end_curriculum", nextNode: 'end_session_fireworks'},
+            { text: "btn_end_curriculum", nextNode: 'end_curriculum'},
             { text: "btn_start_over", nextNode: 'start' }
         ] 
-    },
-    'end_session_fireworks': {
-      type: 'REDIRECT',
-      nextNode: 'end_curriculum'
     },
     'end_curriculum': {
         text: 'end_curriculum_text',
