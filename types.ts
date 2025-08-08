@@ -114,4 +114,6 @@ export interface GameState {
     lastQuestionId: string;
     visitedProgressNodes: Set<string>;
     quizCompleted: boolean;
+    q6Attempts: number;
+    q7Attempts: number;
 }
