@@ -256,7 +256,7 @@ const App: React.FC = () => {
             const fireworksTimer = setTimeout(() => {
                 setShowFireworks(false);
                 setCurrentNodeId('end_curriculum');
-            }, 4500); // Duration of the fireworks display
+            }, 7500); // Duration of the fireworks display
             return () => clearTimeout(fireworksTimer);
         }
 
