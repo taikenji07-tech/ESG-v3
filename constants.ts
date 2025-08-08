@@ -1,3 +1,4 @@
+
 import type { DecisionTree, Achievements, DragDropQuizNode, WordSearchQuizNode } from './types';
 
 export const achievements: Achievements = {
@@ -353,7 +354,7 @@ export const decisionTree: DecisionTree = {
         buttons: [ 
             { text: "btn_claim_certificate", nextNode: 'show_certificate_action', type: 'show_certificate' },
             { text: "btn_end_curriculum", nextNode: 'end_session_fireworks'},
-            { text: "btn_start_over", nextNode: 'restart_quiz' } 
+            { text: "btn_start_over", nextNode: 'start' } 
         ]
     },
     'final_thanks_no_quiz': { 
