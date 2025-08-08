@@ -110,6 +110,8 @@ const App: React.FC = () => {
         lastQuestionId: '',
         visitedProgressNodes: new Set(),
         quizCompleted: false,
+        q6Attempts: 0,
+        q7Attempts: 0,
     };
 
     const [gameState, setGameState] = useState<GameState>(initialGameState);
@@ -131,6 +133,20 @@ const App: React.FC = () => {
     const dynamicResponseTextRef = useRef<string | null>(null);
     const userInteractionCount = useRef(0);
     
+    const QUIZ_POINTS = {
+      // For standard MCQs and DragDrop
+      'quiz_q1': { base: 90, bonus: 10 }, // DragDrop
+      'quiz_q2': { base: 40, bonus: 10 }, // MCQ
+      'quiz_q3': { base: 40, bonus: 10 }, // MCQ
+      'quiz_q4': { base: 40, bonus: 10 }, // MCQ
+      'quiz_q5': { base: 40, bonus: 10 }, // MCQ
+      // For prompt-based questions
+      'quiz_q6_prompt': { base: 130, bonus: 20 },
+      'quiz_q7_prompt': { base: 130, bonus: 20 },
+      // For word search
+      'quiz_q8': { base: 180, bonus: 20 },
+    };
+
     const t = (key: string, replacements?: Record<string, string | number>): string => {
         let text = translations[language][key] || key;
         if (replacements) {
@@ -171,7 +187,7 @@ const App: React.FC = () => {
     const updateScore = (points: number) => {
         setGameState(prev => {
             if (prev.quizCompleted) return prev;
-            return { ...prev, score: prev.score + points };
+            return { ...prev, score: Math.min(1000, prev.score + points) };
         });
     };
 
@@ -184,29 +200,13 @@ const App: React.FC = () => {
         setGameState(prev => {
             const newAchievements = new Set(prev.achievements);
             newAchievements.add(id);
-            const scoreToAdd = prev.quizCompleted ? 0 : achievement.points;
+            // Achievements no longer grant points directly.
+            const scoreToAdd = 0;
             return { ...prev, achievements: newAchievements, score: prev.score + scoreToAdd };
         });
         
         setActiveAchievement(achievement);
         setTimeout(() => setActiveAchievement(null), 3500);
-    };
-    
-    const updateStreak = (isCorrect: boolean) => {
-        if (gameState.quizCompleted) return;
-        if (isCorrect) {
-            const newStreak = gameState.streak + 1;
-            // Re-balanced scoring: 90 base points, +20 for each consecutive correct answer.
-            const pointsToAdd = 90 + (newStreak > 1 ? 20 : 0);
-            updateScore(pointsToAdd);
-            setGameState(prev => ({ ...prev, streak: newStreak, quizCorrectAnswers: prev.quizCorrectAnswers + 1 }));
-
-            if (newStreak === 3) {
-                showAchievement('streak_3');
-            }
-        } else {
-            setGameState(prev => ({ ...prev, streak: 0 }));
-        }
     };
     
     const resetGame = () => {
@@ -220,27 +220,31 @@ const App: React.FC = () => {
     };
 
     useEffect(() => {
-        if (progressNodes.has(currentNodeId)) {
-            setGameState(prev => {
-                if (prev.visitedProgressNodes.has(currentNodeId)) {
-                    return prev;
-                }
-                const newVisited = new Set(prev.visitedProgressNodes);
-                newVisited.add(currentNodeId);
-                return { ...prev, visitedProgressNodes: newVisited };
-            });
-        }
-    }, [currentNodeId]);
-
-    useEffect(() => {
         if (appPhase !== 'chat') return;
+        
+        // --- LEARNING PROGRESS SCORING ---
+        if (progressNodes.has(currentNodeId) && !gameState.quizCompleted) {
+            const isNewNode = !gameState.visitedProgressNodes.has(currentNodeId);
+            if (isNewNode) {
+                setGameState(prev => {
+                    const newVisited = new Set(prev.visitedProgressNodes).add(currentNodeId);
+                    // Award 10 points for each new learning step, capping at 200 for this phase.
+                    const scoreToAdd = prev.score < 200 ? 10 : 0;
+                    return {
+                        ...prev,
+                        visitedProgressNodes: newVisited,
+                        score: prev.score + scoreToAdd,
+                    };
+                });
+            }
+        }
         
         if (currentNodeId === 'end_session_fireworks') {
             setShowFireworks(true);
             const fireworksTimer = setTimeout(() => {
                 setShowFireworks(false);
                 setCurrentNodeId('end_curriculum');
-            }, 7500); // Duration of the fireworks display, increased by 3 seconds
+            }, 7500); // Duration of the fireworks display
             return () => clearTimeout(fireworksTimer);
         }
 
@@ -257,25 +261,51 @@ const App: React.FC = () => {
             setCurrentNodeId(nextNodeId);
             return;
         }
+
+        // --- QUIZ SCORING (for nodes with isCorrect flag like MCQs and Drag&Drop) ---
+        if (node.isCorrect !== undefined) {
+            const questionId = gameState.lastQuestionId;
+            const pointsInfo = QUIZ_POINTS[questionId as keyof typeof QUIZ_POINTS];
+
+            if (node.isCorrect) {
+                if (pointsInfo) {
+                    let pointsToAdd = pointsInfo.base;
+                    if (gameState.streak > 0) {
+                        pointsToAdd += pointsInfo.bonus;
+                    }
+                    updateScore(pointsToAdd);
+                }
+                setGameState(prev => {
+                    const newStreak = prev.streak + 1;
+                    if (newStreak === 3) {
+                        showAchievement('streak_3');
+                    }
+                    return {
+                        ...prev,
+                        streak: newStreak,
+                        quizCorrectAnswers: prev.quizCorrectAnswers + 1
+                    };
+                });
+            } else { // Incorrect answer
+                setGameState(prev => ({ ...prev, streak: 0 }));
+            }
+        }
         
         const typingTimer = setTimeout(() => {
             setIsTyping(false);
 
-            if (node.isCorrect !== undefined) updateStreak(node.isCorrect);
             if (node.achievementId) showAchievement(node.achievementId);
             
             let messageText: string;
             const replacements: Record<string, string | number> = {
                 userName: gameState.userName,
-                score: gameState.score,
+                score: Math.round(gameState.score),
                 quizCorrectAnswers: gameState.quizCorrectAnswers,
                 major: gameState.major,
             };
 
-            // Dynamic CO2 calculation for end messages
             if (currentNodeId === 'quiz_end' || currentNodeId === 'final_thanks_no_quiz') {
                 const co2 = (userInteractionCount.current * 0.2).toFixed(1);
-                // The original text had 203g for 30 minutes. We use this ratio.
                 const acMinutes = Math.round(parseFloat(co2) / (203 / 30));
                 replacements.co2 = co2;
                 replacements.acMinutes = acMinutes;
@@ -314,9 +344,8 @@ const App: React.FC = () => {
                             : 'more_importance_esg_revisit_text_insurance_link';
                         messageText = t(key);
                     } else if (currentNodeId === 'insurance_demo_prompt') {
-                        // Special handling for the insurance demo loop if needed, for now it will just redisplay the question.
-                    }
-                    else { // Fallback for other loops like main_loop
+                        // Special handling for the insurance demo loop if needed
+                    } else { 
                         const revisitTextKey = isSecondary ? 'more_importance_esg_revisit_text' : 'main_loop_revisit_text';
                         messageText = t(revisitTextKey, { userName: gameState.userName });
                     }
@@ -366,11 +395,11 @@ const App: React.FC = () => {
 
         if (type === 'external_link') {
             window.open(nextNodeId, '_blank', 'noopener,noreferrer');
-            return; // Don't alter chat state, just open a link
+            return;
         }
 
         if (type === 'share_linkedin') {
-            const shareText = encodeURIComponent(`I just completed the ESG Student Guide by RHB, scoring ${gameState.score} out of 1000 points, and earned a certificate of completion! It's a fantastic interactive way to learn about Environmental, Social, and Governance principles. #ESG #Sustainability #RHBCares ##RHBInsurance`);
+            const shareText = encodeURIComponent(`I just completed the ESG Student Guide by RHB, scoring ${Math.round(gameState.score)} out of 1000 points, and earned a certificate of completion! It's a fantastic interactive way to learn about Environmental, Social, and Governance principles. #ESG #Sustainability #RHBCares #RHBInsurance`);
             const url = `https://www.linkedin.com/feed/?shareActive=true&text=${shareText}`;
             window.open(url, '_blank');
             return;
@@ -402,18 +431,20 @@ const App: React.FC = () => {
         if (nextNodeId === 'restart_quiz') {
             setGameState(prev => ({
                 ...prev,
-                score: 280,
+                score: prev.visitedProgressNodes.size * 10, // Recalculate learning score
                 streak: 0,
                 quizCorrectAnswers: 0,
                 lastQuestionId: '',
-                quizCompleted: false, // Allow earning points and achievements again
+                quizCompleted: false,
+                q6Attempts: 0,
+                q7Attempts: 0,
             }));
             setCurrentNodeId('quiz_q1');
             return;
         }
         
         if (nextNodeId === 'quiz_end' && !gameState.quizCompleted) {
-            if (gameState.quizCorrectAnswers >= 5) { // Updated for new number of questions
+            if (gameState.quizCorrectAnswers >= 5) {
                 showAchievement('quiz_master');
             }
             setGameState(prev => ({...prev, quizCompleted: true}));
@@ -431,7 +462,6 @@ const App: React.FC = () => {
 
             if (isMainLoop) {
                 if (!visitedLoopBranches.has(topicKey)) {
-                    updateScore(50); // Award points for completing a main topic
                     const newVisited = new Set(visitedLoopBranches).add(topicKey);
                     setVisitedLoopBranches(newVisited);
                     if (newVisited.size === 1) showAchievement('branch_complete');
@@ -467,10 +497,21 @@ const App: React.FC = () => {
         const lastMessage = messages[messages.length - 1];
         addMessage({ sender: 'user', text: t('btn_finish_quiz') }, lastMessage.id);
         
-        setGameState(prev => ({ ...prev, lastQuestionId: 'quiz_q8' }));
+        const pointsInfo = QUIZ_POINTS['quiz_q8'];
+        let pointsToAdd = pointsInfo.base;
+        if (gameState.streak > 0) {
+            pointsToAdd += pointsInfo.bonus;
+        }
+        updateScore(pointsToAdd);
+        
+        setGameState(prev => ({
+            ...prev,
+            lastQuestionId: 'quiz_q8',
+            streak: prev.streak + 1,
+            quizCorrectAnswers: prev.quizCorrectAnswers + 1,
+        }));
 
         const node = decisionTree['quiz_q8'] as WordSearchQuizNode;
-        updateStreak(true); // Word search is always correct upon completion
         setCurrentNodeId(node.nextNode);
     };
 
@@ -505,6 +546,10 @@ const App: React.FC = () => {
         if (currentNodeId === 'start') {
             setGameState(prev => ({...prev, userName: message}));
             showAchievement('first_steps');
+        } else if (currentNodeId === 'quiz_q6_prompt') {
+            setGameState(prev => ({ ...prev, q6Attempts: prev.q6Attempts + 1 }));
+        } else if (currentNodeId === 'quiz_q7_prompt') {
+            setGameState(prev => ({ ...prev, q7Attempts: prev.q7Attempts + 1 }));
         }
 
         if (quizOrder.includes(currentNodeId)) {
@@ -540,6 +585,26 @@ const App: React.FC = () => {
                 }
 
                 if (isRelevant) {
+                     if (currentNodeId === 'quiz_q6_prompt' || currentNodeId === 'quiz_q7_prompt') {
+                        const pointsInfo = QUIZ_POINTS[currentNodeId];
+                        const attempts = currentNodeId === 'quiz_q6_prompt' ? gameState.q6Attempts : gameState.q7Attempts;
+                        const penalty = (attempts - 1) * 10;
+                        
+                        let pointsToAdd = pointsInfo.base;
+                        if (gameState.streak > 0) {
+                            pointsToAdd += pointsInfo.bonus;
+                        }
+                        
+                        const finalPoints = Math.max(0, pointsToAdd - penalty);
+                        updateScore(finalPoints);
+                        
+                        setGameState(prev => ({
+                            ...prev,
+                            streak: prev.streak + 1,
+                            quizCorrectAnswers: prev.quizCorrectAnswers + 1,
+                        }));
+                    }
+
                     if (currentNodeId === 'degree_major_prompt') {
                         setGameState(prev => ({...prev, major: message}));
                     }
@@ -574,7 +639,7 @@ const App: React.FC = () => {
             {showFireworks && <Fireworks />}
             <div className="relative z-10 flex flex-col h-dvh">
                 <Header 
-                    score={gameState.score}
+                    score={Math.round(gameState.score)}
                     streak={gameState.streak}
                     progress={progressPercent}
                     theme={theme}
