@@ -10,7 +10,6 @@ import { decisionTree, achievements, quizOrder, progressNodes, totalProgressStep
 import { translations } from './translations';
 import type { Message, NodeId, DecisionTree, Node, Button, GameState, Achievement, LoopQuestionNode, Language, DragDropQuizNode, WordSearchQuizNode } from './types';
 import { getDynamicResponse, translateToMalay } from './geminiService';
-import { Certificate } from './Certificate';
 import { Fireworks } from './Fireworks';
 
 const avatarIconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
@@ -124,7 +123,6 @@ const App: React.FC = () => {
     const [theme, setTheme] = useState<'light' | 'dark'>('light');
     const [language, setLanguage] = useState<Language>('en');
     const [activeAchievement, setActiveAchievement] = useState<Achievement | null>(null);
-    const [showCertificate, setShowCertificate] = useState(false);
     const [appPhase, setAppPhase] = useState<'avatar_selection' | 'chat'>('avatar_selection');
     const [userAvatar, setUserAvatar] = useState<string>('avatar1');
     const [showFireworks, setShowFireworks] = useState(false);
@@ -380,7 +378,17 @@ const App: React.FC = () => {
 
         if (type === 'show_certificate') {
             addMessage({ sender: 'user', text: buttonText }, lastMessage.id);
-            setShowCertificate(true);
+            window.open('https://forms.gle/sRHMtNC7m7HZjePY7', '_blank', 'noopener,noreferrer');
+            
+            addMessage({
+                sender: 'bot',
+                text: t('post_certificate_text'),
+                buttons: [
+                    { text: t('btn_share_score'), nextNode: 'share_action', type: 'share_linkedin' },
+                    { text: t('btn_end_curriculum'), nextNode: 'end_session_fireworks' },
+                    { text: t('btn_start_over'), nextNode: 'start' }
+                ]
+            });
             return;
         }
 
@@ -481,19 +489,6 @@ const App: React.FC = () => {
         setCurrentNodeId(node.nextNode);
     };
 
-    const handleCertificateClose = () => {
-        setShowCertificate(false);
-        addMessage({
-            sender: 'bot',
-            text: t('post_certificate_text'),
-            buttons: [
-                { text: t('btn_share_score'), nextNode: 'share_action', type: 'share_linkedin' },
-                { text: t('btn_end_curriculum'), nextNode: 'end_session_fireworks' },
-                { text: t('btn_start_over'), nextNode: 'restart_quiz' }
-            ]
-        });
-    };
-    
     const handlePromptInput = async () => {
         userInteractionCount.current++;
         const message = inputValue.trim();
@@ -577,13 +572,6 @@ const App: React.FC = () => {
         <>
             <BackgroundEffects />
             {showFireworks && <Fireworks />}
-            {showCertificate && (
-                <Certificate 
-                    name={gameState.userName} 
-                    date={new Date().toLocaleDateString('en-GB')} 
-                    onClose={handleCertificateClose} 
-                />
-            )}
             <div className="relative z-10 flex flex-col h-dvh">
                 <Header 
                     score={gameState.score}
