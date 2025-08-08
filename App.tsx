@@ -10,7 +10,6 @@ import { decisionTree, achievements, quizOrder, progressNodes, totalProgressStep
 import { translations } from './translations';
 import type { Message, NodeId, DecisionTree, Node, Button, GameState, Achievement, LoopQuestionNode, Language, DragDropQuizNode, WordSearchQuizNode } from './types';
 import { getDynamicResponse, translateToMalay } from './geminiService';
-import { Fireworks } from './Fireworks';
 
 const avatarIconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
     avatar1: Avatar1Icon,
@@ -127,7 +126,6 @@ const App: React.FC = () => {
     const [activeAchievement, setActiveAchievement] = useState<Achievement | null>(null);
     const [appPhase, setAppPhase] = useState<'avatar_selection' | 'chat'>('avatar_selection');
     const [userAvatar, setUserAvatar] = useState<string>('avatar1');
-    const [showFireworks, setShowFireworks] = useState(false);
 
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const dynamicResponseTextRef = useRef<string | null>(null);
@@ -237,15 +235,6 @@ const App: React.FC = () => {
                     };
                 });
             }
-        }
-        
-        if (currentNodeId === 'end_session_fireworks') {
-            setShowFireworks(true);
-            const fireworksTimer = setTimeout(() => {
-                setShowFireworks(false);
-                setCurrentNodeId('end_curriculum');
-            }, 7500); // Duration of the fireworks display
-            return () => clearTimeout(fireworksTimer);
         }
 
         const node: Node = (decisionTree as DecisionTree)[currentNodeId];
@@ -414,7 +403,7 @@ const App: React.FC = () => {
                 text: t('post_certificate_text'),
                 buttons: [
                     { text: t('btn_share_score'), nextNode: 'share_action', type: 'share_linkedin' },
-                    { text: t('btn_end_curriculum'), nextNode: 'end_session_fireworks' },
+                    { text: t('btn_end_curriculum'), nextNode: 'end_curriculum' },
                     { text: t('btn_start_over'), nextNode: 'start' }
                 ]
             });
@@ -636,7 +625,6 @@ const App: React.FC = () => {
     return (
         <>
             <BackgroundEffects />
-            {showFireworks && <Fireworks />}
             <div className="relative z-10 flex flex-col h-dvh">
                 <Header 
                     score={Math.round(gameState.score)}
