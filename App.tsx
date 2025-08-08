@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './Header';
 import { BackgroundEffects } from './BackgroundEffects';
@@ -42,9 +41,8 @@ const ChatMessage: React.FC<{
     onOptionClick: (nextNodeId: NodeId, branchKey: string, buttonText: string, type?: 'share_linkedin' | 'show_certificate' | 'external_link') => void;
     onDragDropQuizComplete: (isCorrect: boolean) => void;
     onWordSearchQuizComplete: () => void;
-    onWordSearchQuizSkip: () => void;
     userAvatar: string;
-}> = ({ message, onOptionClick, onDragDropQuizComplete, onWordSearchQuizComplete, onWordSearchQuizSkip, userAvatar }) => {
+}> = ({ message, onOptionClick, onDragDropQuizComplete, onWordSearchQuizComplete, userAvatar }) => {
     const formatMessageContent = (text: string) => {
         return text
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -92,13 +90,17 @@ const ChatMessage: React.FC<{
                         <DragDropQuiz node={message.quizData} onComplete={onDragDropQuizComplete} language={message.language!} />
                     )}
                     {message.quizData && message.quizData.type === 'QUIZ_WORD_SEARCH' && (
-                        <WordSearchQuiz node={message.quizData} onComplete={onWordSearchQuizComplete} onSkip={onWordSearchQuizSkip} language={message.language!} />
+                        <WordSearchQuiz node={message.quizData} onComplete={onWordSearchQuizComplete} language={message.language!} />
                     )}
                 </div>
             </div>
         </div>
     );
 };
+
+// Defines the bonus points awarded for each consecutive correct answer (streak).
+// The sum of these bonuses for a perfect quiz run is 100.
+const streakBonusPoints = [0, 4, 7, 11, 14, 18, 21, 25]; // index 0 is for streak 0, index 1 for streak 1, etc.
 
 const App: React.FC = () => {
     const initialGameState: GameState = {
@@ -111,6 +113,7 @@ const App: React.FC = () => {
         lastQuestionId: '',
         visitedProgressNodes: new Set(),
         quizCompleted: false,
+        quizRetries: {},
     };
 
     const [gameState, setGameState] = useState<GameState>(initialGameState);
@@ -172,7 +175,7 @@ const App: React.FC = () => {
 
     const updateScore = (points: number) => {
         setGameState(prev => {
-            if (prev.quizCompleted) return prev;
+            if (prev.quizCompleted && points > 0) return prev; // Do not add points after quiz is done, but allow deductions
             return { ...prev, score: prev.score + points };
         });
     };
@@ -198,9 +201,6 @@ const App: React.FC = () => {
         if (gameState.quizCompleted) return;
         if (isCorrect) {
             const newStreak = gameState.streak + 1;
-            // Re-balanced scoring: 90 base points, +20 for each consecutive correct answer.
-            const pointsToAdd = 90 + (newStreak > 1 ? 20 : 0);
-            updateScore(pointsToAdd);
             setGameState(prev => ({ ...prev, streak: newStreak, quizCorrectAnswers: prev.quizCorrectAnswers + 1 }));
 
             if (newStreak === 3) {
@@ -224,12 +224,26 @@ const App: React.FC = () => {
     useEffect(() => {
         if (progressNodes.has(currentNodeId)) {
             setGameState(prev => {
-                if (prev.visitedProgressNodes.has(currentNodeId)) {
+                if (prev.visitedProgressNodes.has(currentNodeId) || prev.quizCompleted) {
                     return prev;
                 }
                 const newVisited = new Set(prev.visitedProgressNodes);
                 newVisited.add(currentNodeId);
-                return { ...prev, visitedProgressNodes: newVisited };
+
+                // Award points for learning progress up to a max of 200
+                const MAX_LEARNING_POINTS = 200;
+                const pointsPerStep = MAX_LEARNING_POINTS / totalProgressSteps;
+                
+                const currentLearningPoints = Math.floor(prev.visitedProgressNodes.size * pointsPerStep);
+                const newLearningPoints = Math.floor(newVisited.size * pointsPerStep);
+                
+                const pointsToAdd = newLearningPoints - currentLearningPoints;
+
+                return { 
+                    ...prev,
+                    visitedProgressNodes: newVisited,
+                    score: prev.score + pointsToAdd
+                };
             });
         }
     }, [currentNodeId]);
@@ -263,7 +277,6 @@ const App: React.FC = () => {
         const typingTimer = setTimeout(() => {
             setIsTyping(false);
 
-            if (node.isCorrect !== undefined) updateStreak(node.isCorrect);
             if (node.achievementId) showAchievement(node.achievementId);
             
             let messageText: string;
@@ -372,10 +385,30 @@ const App: React.FC = () => {
         }
 
         if (type === 'share_linkedin') {
-            const shareText = encodeURIComponent(`I just completed the ESG Student Guide by RHB, scoring ${gameState.score} out of 1000 points, and earned a certificate of completion! It's a fantastic interactive way to learn about Environmental, Social, and Governance principles. #ESG #Sustainability #RHBCares #RHBInsurance`);
+            const shareText = encodeURIComponent(`I just completed the ESG Student Guide by RHB, scoring ${gameState.score} out of 1000 points, and earned a certificate of completion! It's a fantastic interactive way to learn about Environmental, Social, and Governance principles. #ESG #Sustainability #Student #RHBCares #RHB #RHBI`);
             const url = `https://www.linkedin.com/feed/?shareActive=true&text=${shareText}`;
             window.open(url, '_blank');
             return;
+        }
+        
+        const previousNode = decisionTree[currentNodeId];
+        const nextNode = decisionTree[nextNodeId];
+
+        if (quizOrder.includes(currentNodeId) && nextNode && 'isCorrect' in nextNode && typeof nextNode.isCorrect !== 'undefined') {
+            if (nextNode.isCorrect) {
+                let basePoints = 0;
+                switch (currentNodeId) {
+                    case 'quiz_q2': basePoints = 40; break;
+                    case 'quiz_q3': basePoints = 40; break;
+                    case 'quiz_q4': basePoints = 40; break;
+                    case 'quiz_q5': basePoints = 40; break;
+                }
+                if (basePoints > 0) {
+                    const bonus = streakBonusPoints[gameState.streak] || 0;
+                    updateScore(basePoints + bonus);
+                }
+            }
+            updateStreak(nextNode.isCorrect);
         }
 
         if (type === 'show_certificate') {
@@ -390,22 +423,9 @@ const App: React.FC = () => {
             resetGame();
             return;
         }
-
-        if (nextNodeId === 'restart_quiz') {
-            setGameState(prev => ({
-                ...prev,
-                score: 280,
-                streak: 0,
-                quizCorrectAnswers: 0,
-                lastQuestionId: '',
-                quizCompleted: false, // Allow earning points and achievements again
-            }));
-            setCurrentNodeId('quiz_q1');
-            return;
-        }
         
         if (nextNodeId === 'quiz_end' && !gameState.quizCompleted) {
-            if (gameState.quizCorrectAnswers >= 5) { // Updated for new number of questions
+            if (gameState.quizCorrectAnswers >= 6) { 
                 showAchievement('quiz_master');
             }
             setGameState(prev => ({...prev, quizCompleted: true}));
@@ -414,8 +434,6 @@ const App: React.FC = () => {
         if (quizOrder.includes(currentNodeId)) {
             setGameState(prev => ({...prev, lastQuestionId: currentNodeId}));
         }
-
-        const previousNode = decisionTree[currentNodeId];
         
         if (previousNode.type === 'LOOP_QUESTION') {
             const topicKey = branchKey;
@@ -423,7 +441,6 @@ const App: React.FC = () => {
 
             if (isMainLoop) {
                 if (!visitedLoopBranches.has(topicKey)) {
-                    updateScore(50); // Award points for completing a main topic
                     const newVisited = new Set(visitedLoopBranches).add(topicKey);
                     setVisitedLoopBranches(newVisited);
                     if (newVisited.size === 1) showAchievement('branch_complete');
@@ -448,6 +465,12 @@ const App: React.FC = () => {
         const lastMessage = messages[messages.length - 1];
         addMessage({ sender: 'user', text: t('btn_check_answer') }, lastMessage.id);
         
+        if (isCorrect) {
+            const bonus = streakBonusPoints[gameState.streak] || 0;
+            updateScore(80 + bonus); // Q1: 80 base points + streak bonus
+        }
+        updateStreak(isCorrect);
+
         setGameState(prev => ({ ...prev, lastQuestionId: 'quiz_q1' }));
 
         const node = decisionTree['quiz_q1'] as DragDropQuizNode;
@@ -459,23 +482,11 @@ const App: React.FC = () => {
         const lastMessage = messages[messages.length - 1];
         addMessage({ sender: 'user', text: t('btn_finish_quiz') }, lastMessage.id);
         
+        const bonus = streakBonusPoints[gameState.streak] || 0;
+        updateScore(200 + bonus); // Q8: 200 base points + streak bonus
+        updateStreak(true);
+
         setGameState(prev => ({ ...prev, lastQuestionId: 'quiz_q8' }));
-
-        const node = decisionTree['quiz_q8'] as WordSearchQuizNode;
-        updateStreak(true); // Word search is always correct upon completion
-        setCurrentNodeId(node.nextNode);
-    };
-
-    const handleWordSearchQuizSkip = () => {
-        userInteractionCount.current++;
-        const lastMessage = messages[messages.length - 1];
-        addMessage({ sender: 'user', text: t('btn_skip_question') }, lastMessage.id);
-
-        setGameState(prev => ({ 
-            ...prev, 
-            lastQuestionId: 'quiz_q8',
-            streak: 0 // Skipping breaks the streak
-        }));
 
         const node = decisionTree['quiz_q8'] as WordSearchQuizNode;
         setCurrentNodeId(node.nextNode);
@@ -489,7 +500,7 @@ const App: React.FC = () => {
             buttons: [
                 { text: t('btn_share_score'), nextNode: 'share_action', type: 'share_linkedin' },
                 { text: t('btn_end_curriculum'), nextNode: 'end_session_fireworks' },
-                { text: t('btn_start_over'), nextNode: 'restart_quiz' }
+                { text: t('btn_start_over'), nextNode: 'start' }
             ]
         });
     };
@@ -548,9 +559,26 @@ const App: React.FC = () => {
                     if (currentNodeId === 'degree_major_prompt') {
                         setGameState(prev => ({...prev, major: message}));
                     }
+                     if (currentNodeId === 'quiz_q6_prompt' || currentNodeId === 'quiz_q7_prompt') {
+                        const bonus = streakBonusPoints[gameState.streak] || 0;
+                        const retries = gameState.quizRetries[currentNodeId] || 0;
+                        const pointsToAward = Math.max(0, 130 - (retries * 10)); // Q6/Q7: 130 base points
+                        updateScore(pointsToAward + bonus);
+                        updateStreak(true);
+                    }
                     dynamicResponseTextRef.current = finalResponseText;
                     setCurrentNodeId(lastNode.nextNode);
                 } else {
+                    if (currentNodeId === 'quiz_q6_prompt' || currentNodeId === 'quiz_q7_prompt') {
+                         setGameState(prev => ({
+                           ...prev,
+                           streak: 0, // An irrelevant answer breaks the streak
+                           quizRetries: {
+                               ...prev.quizRetries,
+                               [currentNodeId]: (prev.quizRetries[currentNodeId] || 0) + 1,
+                           }
+                       }));
+                   }
                     addMessage({sender: 'bot', text: finalResponseText});
                     setInputVisible(true);
                 }
@@ -584,7 +612,7 @@ const App: React.FC = () => {
                     onClose={handleCertificateClose} 
                 />
             )}
-            <div className="relative z-10 flex flex-col h-dvh">
+            <div className="relative z-10 flex flex-col h-screen">
                 <Header 
                     score={gameState.score}
                     streak={gameState.streak}
@@ -618,7 +646,7 @@ const App: React.FC = () => {
                         <>
                             <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar">
                                 {messages.map((msg) => (
-                                <ChatMessage key={msg.id} message={msg} onOptionClick={handleOptionClick} onDragDropQuizComplete={handleDragDropQuizComplete} onWordSearchQuizComplete={handleWordSearchQuizComplete} onWordSearchQuizSkip={handleWordSearchQuizSkip} userAvatar={userAvatar} />
+                                <ChatMessage key={msg.id} message={msg} onOptionClick={handleOptionClick} onDragDropQuizComplete={handleDragDropQuizComplete} onWordSearchQuizComplete={handleWordSearchQuizComplete} userAvatar={userAvatar} />
                                 ))}
                                 {isTyping && <TypingIndicator />}
                             </div>
