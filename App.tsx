@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './Header';
 import { BackgroundEffects } from './BackgroundEffects';
@@ -10,6 +9,7 @@ import { decisionTree, achievements, quizOrder, progressNodes, totalProgressStep
 import { translations } from './translations';
 import type { Message, NodeId, DecisionTree, Node, Button, GameState, Achievement, LoopQuestionNode, Language, DragDropQuizNode, WordSearchQuizNode } from './types';
 import { getDynamicResponse, translateToMalay } from './geminiService';
+import { logUserData } from './dataLogger';
 
 const avatarIconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
     avatar1: Avatar1Icon,
@@ -105,12 +105,15 @@ const App: React.FC = () => {
         achievements: new Set(),
         quizCorrectAnswers: 0,
         userName: '',
+        email: '',
+        university: '',
         major: '',
         lastQuestionId: '',
         visitedProgressNodes: new Set(),
         quizCompleted: false,
         q6Attempts: 0,
         q7Attempts: 0,
+        hasLoggedFinalScore: false,
     };
 
     const [gameState, setGameState] = useState<GameState>(initialGameState);
@@ -220,6 +223,22 @@ const App: React.FC = () => {
     useEffect(() => {
         if (appPhase !== 'chat') return;
         
+        // --- FINAL DATA SUBMISSION ---
+        // At the end of the activity, log all user data to the form.
+        if (
+            (currentNodeId === 'quiz_end' || currentNodeId === 'final_thanks_no_quiz') &&
+            !gameState.hasLoggedFinalScore
+        ) {
+            logUserData({
+                name: gameState.userName,
+                email: gameState.email,
+                university: gameState.university,
+                score: gameState.score,
+            });
+            // Set flag to prevent re-logging
+            setGameState(prev => ({ ...prev, hasLoggedFinalScore: true }));
+        }
+
         // --- LEARNING PROGRESS SCORING ---
         if (progressNodes.has(currentNodeId) && !gameState.quizCompleted) {
             const isNewNode = !gameState.visitedProgressNodes.has(currentNodeId);
@@ -534,6 +553,10 @@ const App: React.FC = () => {
         
         if (currentNodeId === 'start') {
             setGameState(prev => ({...prev, userName: message}));
+        } else if (currentNodeId === 'ask_email') {
+            setGameState(prev => ({...prev, email: message}));
+        } else if (currentNodeId === 'ask_university') {
+            setGameState(prev => ({...prev, university: message}));
             showAchievement('first_steps');
         } else if (currentNodeId === 'quiz_q6_prompt') {
             setGameState(prev => ({ ...prev, q6Attempts: prev.q6Attempts + 1 }));
