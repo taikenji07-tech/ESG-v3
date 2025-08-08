@@ -28,7 +28,11 @@ export const translations: Translations = {
 
     // Decision Tree Nodes
     start_text:
-      "Hiii! 👋 I'm your super friendly guide to all things ESG! I'm so excited to chat with you. To make this extra personal, what should I call you?",
+      "Hiii! 👋 I'm your super friendly guide to all things ESG! I'm so excited to chat with you. To make this extra personal, what should I call you? Write down your full name!",
+    ask_email_text:
+      "Got it, {userName}. What's your email address? We'll use this to send your certificate upon completion!",
+    ask_university_text:
+      "And which university are you from?",
     greeting_text:
       "It's so lovely to meet you, **{userName}**! 🎉 Let's dive in and learn some amazing things together. First up... what even **is** ESG?",
     what_is_esg_answer_text:
@@ -214,6 +218,10 @@ export const translations: Translations = {
     // Decision Tree Nodes
     start_text:
       "Hiii! 👋 Saya panduan super mesra anda untuk semua tentang ESG! Saya sangat teruja untuk berbual dengan anda. Untuk menjadikannya lebih peribadi, apakah nama panggilan anda?",
+    ask_email_text: 
+      "Baiklah, {userName}. Apakah alamat e-mel anda? Kami hanya akan gunakannya untuk menghantar sijil anda selepas selesai!",
+    ask_university_text:
+       "Dan dari universiti manakah anda?",
     greeting_text:
       "Sangat gembira bertemu dengan anda, **{userName}**! 🎉 Jom kita mula dan belajar perkara-perkara hebat bersama. Pertama sekali... apa sebenarnya *ESG* tu?",
     what_is_esg_answer_text:
