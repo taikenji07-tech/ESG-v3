@@ -49,7 +49,7 @@ export const translations: Translations = {
     insurance_link_answer_text:
       "That's a great question! Think of it this way: ESG is like a global insurance policy for our planet and society. We all contribute to it with good actions.\n\nBut what about protecting **your** world, right now?\n\nThat's where personal insurance comes in. It's a key part of the 'Social' and 'Governance' aspects. Companies like RHB Insurance help provide that safety net for individuals.\n\nWant to see a quick demo of how it works for a student like you?",
     insurance_demo_prompt_text: "Awesome! Let's imagine a common student scenario. Which of these worries you more?",
-    insurance_laptop_answer_text: "Totally valid. Your laptop is your lifeline! Imagine you spill coffee on it right before finals. A good personal effects insurance plan, like one from RHB Insurance, could cover the repair or replacement. It turns a potential crisis (and a huge expense) into a manageable problem. This protects your finances and your studies. 💻",
+    insurance_transport_answer_text: "Totally valid! Your transport is your lifeline. Imagine you get in an accident, or get your car damaged from floods. A good motor insurance plan, like one from RHB Insurance, could cover the repair or replacement. It turns a potential crisis (and a huge expense) into a manageable problem. This protects your finances and you. 🚗",
     insurance_sickness_answer_text: "A classic worry. A sudden fever or a sprained ankle from sports could mean a trip to the clinic and unexpected medical bills. A personal accident or medical plan from RHB Insurance helps cover those costs, so you can focus on getting better, not on your wallet. It's about ensuring you have access to care without financial stress. 🏥",
     insurance_summary_text: "So, in short: ESG is about protecting our collective future. RHB Insurance helps you protect your **personal** present. Both are about being prepared and creating security.\n\nReady to head back to the main topics?",
     
@@ -124,9 +124,10 @@ export const translations: Translations = {
     btn_makes_sense: "That makes sense!",
     btn_yes_show_demo: "Yes, show me a demo!",
     btn_i_get_it_continue: "I get it, let's continue.",
-    btn_laptop_scenario: "My laptop getting stolen or damaged.",
+    btn_transport_scenario: "My car or motorbike getting damaged.",
     btn_sickness_scenario: "Getting sick or having an accident.",
-    btn_thats_useful_move_on: "That's useful. Let's move on.",
+    btn_continue_to_summary: "Continue with the summary",
+    btn_explore_more: "Explore more!",
     btn_yes_go_back: "Yes, let's go back.",
     btn_what_else_you_can_do: "What else can I do?",
     btn_understood: "Understood!",
@@ -233,7 +234,7 @@ export const translations: Translations = {
     insurance_link_answer_text:
       "Soalan yang bagus! Fikirkannya begini: ESG adalah seperti polisi insurans global untuk planet dan masyarakat kita. Kita semua menyumbang kepadanya dengan tindakan yang baik.\n\nTetapi bagaimana pula dengan melindungi dunia **anda**, sekarang?\n\nDi situlah insurans peribadi masuk. Ia adalah bahagian penting dalam aspek 'Sosial' dan 'Tadbir Urus'. Syarikat seperti RHB Insurance membantu menyediakan jaringan keselamatan itu untuk individu.\n\nIngin melihat demo ringkas bagaimana ia berfungsi untuk pelajar seperti anda?",
     insurance_demo_prompt_text: "Hebat! Mari bayangkan senario biasa seorang pelajar. Antara kebimbangan ini, yang manakah lebih merisaukan anda?",
-    insurance_laptop_answer_text: "Sangat difahami. Komputer riba anda adalah talian hayat anda! Bayangkan anda tertumpah kopi di atasnya sebelum peperiksaan akhir. Pelan insurans barangan peribadi yang baik, seperti dari RHB Insurance, boleh menanggung kos pembaikan atau penggantian. Ia mengubah krisis yang berpotensi (dan perbelanjaan besar) menjadi masalah yang boleh diurus. Ini melindungi kewangan dan pengajian anda. 💻",
+    insurance_transport_answer_text: "Sangat difahami! Pengangkutan anda adalah talian hayat anda. Bayangkan anda terlibat dalam kemalangan, atau kereta anda rosak akibat banjir. Pelan insurans motor yang baik, seperti dari RHB Insurance, boleh menanggung kos pembaikan atau penggantian. Ia mengubah krisis yang berpotensi (dan perbelanjaan besar) menjadi masalah yang boleh diurus. Ini melindungi kewangan dan diri anda. 🚗",
     insurance_sickness_answer_text: "Kebimbangan klasik. Demam secara tiba-tiba atau buku lali terseliuh akibat bersukan boleh bermakna lawatan ke klinik dan bil perubatan yang tidak dijangka. Pelan kemalangan peribadi atau perubatan dari RHB Insurance membantu menampung kos tersebut, jadi anda boleh fokus untuk sembuh, bukan pada dompet anda. Ia adalah tentang memastikan anda mempunyai akses kepada penjagaan tanpa tekanan kewangan. 🏥",
     insurance_summary_text: "Jadi, ringkasnya: ESG adalah tentang melindungi masa depan kolektif kita. RHB Insurance membantu melindungi masa kini **peribadi** anda. Kedua-duanya adalah tentang bersedia dan mewujudkan keselamatan.\n\nBersedia untuk kembali ke topik utama?",
 
@@ -308,9 +309,10 @@ export const translations: Translations = {
     btn_makes_sense: "Itu munasabah!",
     btn_yes_show_demo: "Ya, tunjukkan saya demo!",
     btn_i_get_it_continue: "Saya faham, jom teruskan.",
-    btn_laptop_scenario: "Komputer riba saya dicuri atau rosak.",
+    btn_transport_scenario: "Kereta atau motosikal saya rosak.",
     btn_sickness_scenario: "Jatuh sakit atau mengalami kemalangan.",
-    btn_thats_useful_move_on: "Itu berguna. Jom teruskan.",
+    btn_continue_to_summary: "Teruskan dengan ringkasan",
+    btn_explore_more: "Terokai lebih lanjut",
     btn_yes_go_back: "Ya, jom kembali.",
     btn_what_else_you_can_do: "Apa lagi yang boleh saya lakukan?",
     btn_understood: "Faham!",
