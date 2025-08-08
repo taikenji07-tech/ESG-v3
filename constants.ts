@@ -1,4 +1,3 @@
-
 import type { DecisionTree, Achievements, DragDropQuizNode, WordSearchQuizNode } from './types';
 
 export const achievements: Achievements = {
@@ -13,6 +12,8 @@ export const quizOrder = ['quiz_q1', 'quiz_q2', 'quiz_q3', 'quiz_q4', 'quiz_q5',
 
 export const progressNodes = new Set([
   'start',
+  'ask_email',
+  'ask_university',
   'greeting',
   'what_is_esg_answer',
   'main_loop',
@@ -40,11 +41,20 @@ export const decisionTree: DecisionTree = {
     'start': {
         text: "start_text",
         type: 'PROMPT',
+        nextNode: 'ask_email',
+    },
+    'ask_email': {
+        text: "ask_email_text",
+        type: 'PROMPT',
+        nextNode: 'ask_university',
+    },
+    'ask_university': {
+        text: "ask_university_text",
+        type: 'PROMPT',
         nextNode: 'greeting',
     },
     'greeting': {
         text: "greeting_text",
-        isDynamic: true,
         type: 'QUESTION',
         buttons: [ { text: "btn_what_is_esg", nextNode: 'what_is_esg_answer' } ]
     },
