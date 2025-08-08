@@ -111,9 +111,12 @@ export interface GameState {
     quizCorrectAnswers: number;
     userName: string;
     major: string;
+    email: string;
+    university: string;
     lastQuestionId: string;
     visitedProgressNodes: Set<string>;
     quizCompleted: boolean;
     q6Attempts: number;
     q7Attempts: number;
+    hasLoggedFinalScore: boolean;
 }
