@@ -1,4 +1,3 @@
-
 import type { DecisionTree, Achievements, DragDropQuizNode, WordSearchQuizNode } from './types';
 
 export const achievements: Achievements = {
@@ -99,19 +98,25 @@ export const decisionTree: DecisionTree = {
         parentLoop: 'more_importance_esg',
         nextNode: 'insurance_summary',
         branches: {
-            'laptop': { text: "btn_laptop_scenario", nextNode: 'insurance_laptop_answer' },
+            'transport': { text: "btn_transport_scenario", nextNode: 'insurance_transport_answer' },
             'sickness': { text: "btn_sickness_scenario", nextNode: 'insurance_sickness_answer' }
         }
     },
-    'insurance_laptop_answer': {
-        text: "insurance_laptop_answer_text",
+    'insurance_transport_answer': {
+        text: "insurance_transport_answer_text",
         type: 'ANSWER',
-        buttons: [ { text: "btn_thats_useful_move_on", nextNode: 'insurance_demo_redirect' } ]
+        buttons: [
+             { text: "btn_explore_more", nextNode: 'https://www.rhbinsurance.com.my/', type: 'external_link' },
+             { text: "btn_continue_to_summary", nextNode: 'insurance_summary' }
+        ]
     },
     'insurance_sickness_answer': {
         text: "insurance_sickness_answer_text",
         type: 'ANSWER',
-        buttons: [ { text: "btn_thats_useful_move_on", nextNode: 'insurance_demo_redirect' } ]
+        buttons: [
+            { text: "btn_explore_more", nextNode: 'https://www.rhbinsurance.com.my/', type: 'external_link' },
+            { text: "btn_continue_to_summary", nextNode: 'insurance_summary' }
+        ]
     },
     'insurance_demo_redirect': { type: 'REDIRECT', nextNode: 'insurance_demo_prompt' },
     'insurance_summary': {
@@ -258,55 +263,51 @@ export const decisionTree: DecisionTree = {
         nextNode: 'quiz_q1_correct',
         incorrectNextNode: 'quiz_incorrect'
     } as DragDropQuizNode,
-    'quiz_q1_correct': { text: "quiz_q1_correct_text", isCorrect: true, type: 'ANSWER', points: 100, buttons: [ { text: "btn_next_question", nextNode: 'quiz_q2' } ] },
+    'quiz_q1_correct': { text: "quiz_q1_correct_text", isCorrect: true, type: 'ANSWER', buttons: [ { text: "btn_next_question", nextNode: 'quiz_q2' } ] },
     
     'quiz_q2': {
         text: "quiz_q2_text",
         type: 'QUESTION',
-        points: 50,
         buttons: [
             { text: "btn_not_esg_career_1", nextNode: 'quiz_q2_correct' },
             { text: "btn_not_esg_career_2", nextNode: 'quiz_incorrect' },
             { text: "btn_not_esg_career_3", nextNode: 'quiz_incorrect' }
         ]
     },
-    'quiz_q2_correct': { text: "quiz_q2_correct_text", isCorrect: true, type: 'ANSWER', points: 50, buttons: [ { text: "btn_next_question", nextNode: 'quiz_q3' } ] },
+    'quiz_q2_correct': { text: "quiz_q2_correct_text", isCorrect: true, type: 'ANSWER', buttons: [ { text: "btn_next_question", nextNode: 'quiz_q3' } ] },
 
     'quiz_q3': {
         text: "quiz_q3_text",
         type: 'QUESTION',
-        points: 50,
         buttons: [
             { text: "btn_digital_habit_1", nextNode: 'quiz_q3_correct' },
             { text: "btn_digital_habit_2", nextNode: 'quiz_incorrect' },
             { text: "btn_digital_habit_3", nextNode: 'quiz_incorrect' }
         ]
     },
-    'quiz_q3_correct': { text: "quiz_q3_correct_text", isCorrect: true, type: 'ANSWER', points: 50, buttons: [ { text: "btn_next_question", nextNode: 'quiz_q4' } ] },
+    'quiz_q3_correct': { text: "quiz_q3_correct_text", isCorrect: true, type: 'ANSWER', buttons: [ { text: "btn_next_question", nextNode: 'quiz_q4' } ] },
 
     'quiz_q4': {
         text: "quiz_q4_text",
         type: 'QUESTION',
-        points: 50,
         buttons: [
             { text: "btn_governance_action_1", nextNode: 'quiz_incorrect' },
             { text: "btn_governance_action_2", nextNode: 'quiz_q4_correct' },
             { text: "btn_governance_action_3", nextNode: 'quiz_incorrect' }
         ]
     },
-    'quiz_q4_correct': { text: "quiz_q4_correct_text", isCorrect: true, type: 'ANSWER', points: 50, buttons: [ { text: "btn_next_question", nextNode: 'quiz_q5' } ] },
+    'quiz_q4_correct': { text: "quiz_q4_correct_text", isCorrect: true, type: 'ANSWER', buttons: [ { text: "btn_next_question", nextNode: 'quiz_q5' } ] },
 
     'quiz_q5': {
         text: "quiz_q5_text",
         type: 'QUESTION',
-        points: 50,
         buttons: [
             { text: "btn_ripple_effect_1", nextNode: 'quiz_incorrect' },
             { text: "btn_ripple_effect_2", nextNode: 'quiz_q5_correct' },
             { text: "btn_ripple_effect_3", nextNode: 'quiz_incorrect' }
         ]
     },
-    'quiz_q5_correct': { text: "quiz_q5_correct_text", isCorrect: true, type: 'ANSWER', points: 50, buttons: [ { text: "btn_next_question", nextNode: 'quiz_q6_prompt' } ] },
+    'quiz_q5_correct': { text: "quiz_q5_correct_text", isCorrect: true, type: 'ANSWER', buttons: [ { text: "btn_next_question", nextNode: 'quiz_q6_prompt' } ] },
 
     'quiz_q6_prompt': {
         text: "quiz_q6_prompt_text",
@@ -318,8 +319,6 @@ export const decisionTree: DecisionTree = {
         text: "", // AI will provide this text
         type: 'ANSWER',
         isDynamic: true,
-        isCorrect: true,
-        points: 150,
         buttons: [ { text: "btn_next_question", nextNode: 'quiz_q7_prompt' } ]
     },
 
@@ -333,8 +332,6 @@ export const decisionTree: DecisionTree = {
         text: "", // AI will provide this text
         type: 'ANSWER',
         isDynamic: true,
-        isCorrect: true,
-        points: 150,
         buttons: [ { text: "btn_final_question", nextNode: 'quiz_q8' } ]
     },
     
@@ -343,8 +340,7 @@ export const decisionTree: DecisionTree = {
         type: 'QUIZ_WORD_SEARCH',
         words: ['word_recycle', 'word_compost', 'word_renewable', 'word_energy', 'word_water', 'word_future', 'word_green'],
         gridSize: 10,
-        nextNode: 'quiz_end',
-        points: 200,
+        nextNode: 'quiz_end'
     } as WordSearchQuizNode,
 
     'quiz_incorrect': { text: "quiz_incorrect_text", isCorrect: false, type: 'ANSWER', buttons: [ { text: "btn_continue", nextNode: 'determine_next_quiz_q' } ] },
